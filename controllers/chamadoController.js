@@ -52,6 +52,20 @@ function listarPorId(req, res) {
 }
 
 
+function atualizarParcial(req, res) {
+    try {
+        const id = Number(req.params.id);
+        const dadosNovos = req.body;
+        const chamadoAtualizado = chamadoService.atualizarParcial(id, dadosNovos);
 
+        if (!chamadoAtualizado) {
+            return res.status(404).json({ error: "Chamado não encontrado para atualização." });
+        }
 
-module.exports = { criar, listar, listarPorId};
+        return res.status(200).json(chamadoAtualizado);
+    } catch (error) {
+        return res.status(500).json({ error: "Erro ao atualizar o chamado." });
+    }
+}
+
+module.exports = { criar, listar, listarPorId, atualizarParcial };
