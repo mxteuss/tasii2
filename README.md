@@ -2,8 +2,6 @@
 
 Este projeto consiste em uma API REST desenvolvida em Node.js com Express para o gerenciamento e distribuição automatizada de chamados de suporte técnico. A aplicação utiliza persistência em memória e implementa regras de negócio para triagem de atendimento entre os níveis N1 e N2.
 
----
-
 ## Instruções de Instalação e Execução
 
 ### Pré-requisitos
@@ -31,26 +29,6 @@ Este projeto consiste em uma API REST desenvolvida em Node.js com Express para o
   ```
 Ao iniciar com sucesso, a mensagem `Servidor rodando na porta 3000` será exibida no console.
 
----
-
-## Arquitetura e Padrão Implementado
-
-A aplicação foi desenvolvida seguindo o padrão de arquitetura em camadas (**Layered Architecture**), promovendo a separação de responsabilidades (Separation of Concerns):
-
-1. **`index.js` (Ponto de Entrada):** Inicializa o servidor Express, configura os middlewares globais (como `express.json()`) e define os prefixos das rotas globais (`/chamados`).
-2. **`routes/` (Camada de Roteamento):** Mapeia os caminhos das URLs (endpoints) e os verbos HTTP correspondentes, direcionando o fluxo para as funções específicas dos Controllers.
-3. **`controllers/` (Camada de Controle):** Responsável por interceptar a requisição HTTP, extrair os dados do `req.body` ou `req.params`, **aplicar as validações rígidas de entrada (HTTP 400)** e formular a resposta final (`res.status().json()`).
-4. **`services/` (Camada de Serviço/Negócio):** Concentra as regras de negócio lógicas do ecossistema de chamados (como o fluxo de escalonamento para N2) e gerencia a persistência fictícia na coleção em memória.
-
-### Fluxo de Log de Negócio Demonstrado no Terminal:
-```text
-1 - CONTROLLER recebeu { titulo: 'Máquina não liga', prioridade: 'media' }
-2 - SERVICE recebeu { titulo: 'Máquina não liga', prioridade: 'media' }
-N1 recebeu o chamado -> N1 não conseguiu resolver -> Encaminhado para N2
-3 - SERVICE criou { id: 1, titulo: 'Máquina não liga', ..., responsavel: 'Suporte N2' }
-```
-
----
 
 ## Regras de Validação Implementadas
 
@@ -62,7 +40,6 @@ A API possui um mecanismo defensivo contra dados inválidos ou maliciosos. Qualq
 * **Identificadores Inexistentes:** Consultas ou atualizações de IDs não localizados na memória produzem **`HTTP 404 Not Found`**.
 * **Tratamento de Erros Inesperados:** Falhas internas ou exceções de runtime não previstas são interceptadas em blocos `catch` e devolvidas como um **`HTTP 500 Internal Server Error`** limpo, sem expor detalhes sensíveis de infraestrutura ao usuário.
 
----
 
 ## Rotas da API e Exemplos de Requisição
 
@@ -74,20 +51,24 @@ A URL base da aplicação local é: `http://localhost:3000/chamados`
 * **Payload de Exemplo (JSON):**
   ```json
   {
-    "titulo": "Máquina não liga",
-    "prioridade": "media",
-    "tipo": "Hardware",
-    "valor": 150.00
+
+   "cliente": "Carlos Silva",
+   "tipo": "entrega",
+   "valor": 350,
+   "prioridade": "normal"
+
   }
   ```
 * **Resposta Esperada (201 Created):**
   ```json
   {
-    "id": 1,
-    "titulo": "Máquina não liga",
-    "prioridade": "media",
-    "status": "aberto",
-    "responsavel": "Suporte N2"
+
+   "cliente":"Carlos Silva"
+   "tipo":"entrega"
+   "valor":350
+   "prioridade":"normal"
+   "status":"recebido"
+   "responsavel":"Suporte N1"
   }
   ```
 
@@ -96,15 +77,15 @@ A URL base da aplicação local é: `http://localhost:3000/chamados`
 * **Descrição:** Retorna a coleção completa de chamados ativos armazenados.
 * **Resposta Esperada (200 OK):**
   ```json
-  [
-    {
-      "id": 1,
-      "titulo": "Máquina não liga",
-      "prioridade": "media",
-      "status": "aberto",
-      "responsavel": "Suporte N2"
-    }
-  ]
+  {
+    "id": 1,
+    "cliente": "Carlos Silva",
+    "tipo": "entrega",
+    "valor": 350,
+    "prioridade": "normal",
+    "status": "recebido",
+    "responsavel": "Suporte N1"
+  }
   ```
 
 ### 3. Buscar Chamado por ID
@@ -114,10 +95,12 @@ A URL base da aplicação local é: `http://localhost:3000/chamados`
   ```json
   {
     "id": 1,
-    "titulo": "Máquina não liga",
-    "prioridade": "media",
-    "status": "aberto",
-    "responsavel": "Suporte N2"
+    "cliente": "Carlos Silva",
+    "tipo": "entrega",
+    "valor": 350,
+    "prioridade": "normal",
+    "status": "recebido",
+    "responsavel": "Suporte N1"
   }
   ```
 
@@ -127,18 +110,38 @@ A URL base da aplicação local é: `http://localhost:3000/chamados`
 * **Payload de Exemplo (JSON):**
   ```json
   {
-    "status": "em andamento"
+    "valor": "400"
   }
   ```
 * **Resposta Esperada (200 OK):**
   ```json
   {
-    "id": 1,
-    "titulo": "Máquina não liga",
-    "prioridade": "media",
-    "status": "em andamento",
-    "responsavel": "Suporte N2"
+  "id": 1,
+  "cliente": "Carlos Silva",
+  "tipo": "entrega",
+  "valor": 400,
+  "prioridade": "normal",
+  "status": "recebido",
+  "responsavel": "Suporte N1"
   }
   ```
 
 ---
+
+##  Uso de IA
+
+### Tarefas em que a IA foi utilizada:
+* **Configuração Inicial e Resolução de Erros de Ambiente:** Diagnóstico de dependências ausentes (`MODULE_NOT_FOUND`)
+* **Depuração de Código (Debugging):** Identificação de quebras de sintaxe no Express (como erros na biblioteca `path-to-regexp`).
+
+### Análise de Sugestões da IA:
+
+
+#### 1. Sugestão ACEITA: Substituição de Reatribuição por `.push()`
+* **O que a IA sugeriu:** Durante a persistência em memória no Service, foi identificada uma tentativa inválida de reatribuição em uma array constante. A IA sugeriu manter a array como `const` e utilizar o método `.push()` para alterar o estado interno da coleção sem quebrar a referência da variável.
+* **Justificativa:** A sugestão foi aceita pois resolveu o erro de runtime `Assignment to constant variable`, respeitando as boas práticas de imutabilidade.
+
+#### 2. Sugestão REJEITADA: Uso de Middlewares Globais de Validação
+* **O que a IA sugeriu:** Centralizar as validações de dados (como verificar se o ID na URL é um número) em um arquivo de middleware separado no Express antes de chegar aos controllers.
+* **Justificativa:** A sugestão foi rejeitada no momento para manter a arquitetura do projeto mais simples, legível e compacta para esta entrega, optando por centralizar o tratamento de erros estruturais (HTTP 400) diretamente dentro do escopo de cada método no próprio Controller.
+
