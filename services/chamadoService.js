@@ -7,9 +7,11 @@ function criar(dados){
     n = n + 1;
     const chamado = {
         id: n,
-        titulo:dados.titulo,
-        prioridade: dados.prioridade,
-        status:"aberto"
+        cliente:dados.cliente,                
+        tipo: dados.tipo,
+        valor: dados.valor,
+        prioridade: dados.prioridade,   
+        status:"recebido"
     }
     
     chamado.responsavel = suporteN1(chamado)
