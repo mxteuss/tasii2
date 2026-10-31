@@ -32,14 +32,15 @@ function listar(){
 function atualizarParcial(id, dadosNovos) {
     const chamado = chamados.find(c => c.id === id);
 
-    if (!chamado) {
-        return null; 
+    if (!chamado) return null;
+
+    if (chamado.status === "resolvido") {
+        throw new Error("Não é permitido modificar um chamado que já foi resolvido."); 
     }
 
     Object.assign(chamado, dadosNovos);
-
-    console.log(`4 - SERVICE atualizou o chamado ${id}:`, chamado);
     return chamado;
 }
+
 
 module.exports = { criar, listar, listarPorId, atualizarParcial };

@@ -51,20 +51,36 @@ function listarPorId(req, res) {
     }
 }
 
-
 function atualizarParcial(req, res) {
     try {
         const id = Number(req.params.id);
-        const dadosNovos = req.body;
-        const chamadoAtualizado = chamadoService.atualizarParcial(id, dadosNovos);
+
+        if (isNaN(id) || id <= 0) {
+            return res.status(400).json({ error: "O ID fornecido na URL deve ser um número inteiro maior que zero." });
+        }
+
+        const { titulo, prioridade, status, tipo, valor } = req.body;
+        const dadosParaAtualizar = {};
+
+        if (titulo !== undefined) {
+            if (titulo.trim() === "") return res.status(400).json({ error: "O título não pode ser vazio." });
+            dadosParaAtualizar.titulo = titulo;
+        }
+        
+        if (valor !== undefined) {
+            if (typeof valor !== 'number' || valor <= 0) return res.status(400).json({ error: "O valor deve ser numérico e maior que zero." });
+            dadosParaAtualizar.valor = valor;
+        }
+
+        const chamadoAtualizado = chamadoService.atualizarParcial(id, dadosParaAtualizar);
 
         if (!chamadoAtualizado) {
-            return res.status(404).json({ error: "Chamado não encontrado para atualização." });
+            return res.status(404).json({ error: "Identificador inexistente. Chamado não encontrado." });
         }
 
         return res.status(200).json(chamadoAtualizado);
     } catch (error) {
-        return res.status(500).json({ error: "Erro ao atualizar o chamado." });
+        return res.status(500).json({ error: "Ocorreu um erro interno inesperado ao processar sua requisição." });
     }
 }
 
