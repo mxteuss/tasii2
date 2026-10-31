@@ -29,17 +29,5 @@ function listar(){
     return chamadoEncontrado; 
 }
 
-function atualizarParcial(id, dadosNovos) {
-    const chamado = chamados.find(c => c.id === id);
 
-    if (!chamado) {
-        return null; 
-    }
-
-    Object.assign(chamado, dadosNovos);
-
-    console.log(`4 - SERVICE atualizou o chamado ${id}:`, chamado);
-    return chamado;
-}
-
-module.exports = { criar, listar, listarPorId, atualizarParcial };
+module.exports = { criar, listar, listarPorId};
