@@ -2,10 +2,17 @@ const chamadoService = require('../services/chamadoService');
 
 function criar(req, res) {
     try {
-        const { titulo, prioridade } = req.body;
-        if (!titulo || titulo.trim() === "") {
+        const { cliente, tipo, valor, prioridade } = req.body;
+
+        if (!cliente || cliente.trim() === "") {
             return res.status(400).json({ 
-                error: "O campo 'titulo' é obrigatório e não pode estar em branco." 
+                error: "O campo 'cliente' é obrigatório e não pode estar em branco." 
+            });
+        }
+
+        if (!tipo || tipo.trim() === "") {
+            return res.status(400).json({ 
+                error: "O campo 'tipo' é obrigatório e não pode estar em branco." 
             });
         }
 
@@ -15,13 +22,22 @@ function criar(req, res) {
             });
         }
 
+        if (valor === undefined || isNaN(valor) || typeof valor !== 'number' || valor <= 0) {
+            return res.status(400).json({
+                error: "O valor deve ser numérico e maior que zero."
+            });
+        }
 
         console.log("1 - CONTROLLER recebeu", req.body);
+        
         const chamado = chamadoService.criar(req.body);
 
         return res.status(201).json(chamado);
+
     } catch (error) {
-        return res.status(400).json({ error: error.message || error });
+        return res.status(500).json({ 
+            error: error.message || "Ocorreu um erro inesperado no servidor." 
+        });
     }
 }
 
@@ -59,11 +75,11 @@ function atualizarParcial(req, res) {
             return res.status(400).json({ error: "O ID fornecido na URL deve ser um número inteiro maior que zero." });
         }
 
-        const { titulo, prioridade, status, tipo, valor } = req.body;
+        const { cliente, prioridade, status, tipo, valor } = req.body;
         const dadosParaAtualizar = {};
 
-        if (titulo !== undefined) {
-            if (titulo.trim() === "") return res.status(400).json({ error: "O título não pode ser vazio." });
+        if (cliente !== undefined) {
+            if (cliente.trim() === "") return res.status(400).json({ error: "O título não pode ser vazio." });
             dadosParaAtualizar.titulo = titulo;
         }
         
